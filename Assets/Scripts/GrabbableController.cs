@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using Valve.VR.InteractionSystem;
 
-[RequireComponent(typeof(Throwable))]
 public class GrabbableController : MonoBehaviour
 {
-    private Throwable throwable;
     private Transform table;
     private Vector3 initPosition;
     private Quaternion initRotation;
 
     private void Start()
     {
-        throwable = GetComponent<Throwable>();
         table = GameObject.FindWithTag("Table")?.transform;
         var t = transform;
         initPosition = t.position;
@@ -25,24 +19,64 @@ public class GrabbableController : MonoBehaviour
     {
         Debug.Log("ENTER " + other.gameObject.name);
         if (!other.gameObject.CompareTag("Table")) return;
-        if (table != null && transform.parent==null)
+        if (table != null && transform.parent == null)
+        {
             transform.parent = table;
+            transform.GetComponentInParent<Rigidbody>().isKinematic = true;
+        }
     }
 
     private void OnCollisionExit(Collision other)
     {
         Debug.Log("EXIT " + other.gameObject.name);
         if (!other.gameObject.CompareTag("Table")) return;
-        if (transform.parent!=null && transform.parent.Equals(other.gameObject.transform))
+        if (transform.parent != null && transform.parent.Equals(other.gameObject.transform))
+        {
             transform.parent = null;
+            if (!transform.GetComponentInParent<OVRGrabbable>().isGrabbed)
+                transform.GetComponentInParent<Rigidbody>().isKinematic = false;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Debug.Log("EXIT " + other.gameObject.name);
+        if (other.gameObject.CompareTag("Table"))
+        {
+            if (transform.parent != null && transform.parent.Equals(other.gameObject.transform))
+            {
+                transform.parent = null;
+                if (!transform.GetComponentInParent<OVRGrabbable>().isGrabbed)
+                    transform.GetComponentInParent<Rigidbody>().isKinematic = false;
+            }
+        }
+    }
+
+    private void OnTriggerStay(Collider other)
+    {
+        if(!other.gameObject.CompareTag("Table")) return;
+        
+        transform.GetComponentInParent<Rigidbody>().isKinematic = true;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if(!other.CompareTag("Respawn")) return;
-        GetComponent<Rigidbody>().velocity = Vector3.zero;
-        var t = transform;
-        t.position = initPosition;
-        t.rotation = initRotation;
+        Debug.Log("ENTER " + other.gameObject.name);
+        if (other.gameObject.CompareTag("Table"))
+        {
+            if (table != null && transform.parent == null)
+            {
+                transform.parent = table;
+                transform.GetComponentInParent<Rigidbody>().isKinematic = true;
+            }
+        }
+
+        if (other.CompareTag("Respawn"))
+        {
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            var t = transform;
+            t.position = initPosition;
+            t.rotation = initRotation;
+        }
     }
 }

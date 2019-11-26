@@ -760,7 +760,7 @@ namespace Valve.VR
             if (checkingSetup == false && (SteamVR_Input_References.instance.actionSetObjects == null || SteamVR_Input_References.instance.actionSetObjects.Length == 0 || SteamVR_Input_References.instance.actionSetObjects.Any(set => set != null) == false))
             {
                 checkingSetup = true;
-                Debug.Break();
+                //Debug.Break();
 
                 bool open = UnityEditor.EditorUtility.DisplayDialog("[SteamVR]", "It looks like you haven't generated actions for SteamVR Input yet. Would you like to open the SteamVR Input window?", "Yes", "No");
                 if (open)
